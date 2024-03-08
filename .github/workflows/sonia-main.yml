@@ -33,5 +33,5 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args: >
-          -Dsonar.organization=noev-dev-github-actions-nodejs-project
-          -Dsonar.projectKey=noev-dev-project-github-actions-nodejs-project
+          -Dsonar.organization=noev-dev
+          -Dsonar.projectKey=noev-dev-project
