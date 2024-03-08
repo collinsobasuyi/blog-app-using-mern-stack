@@ -1,1 +1,17 @@
+name: Hello World Workflow
 
+# This workflow is triggered on pushes to the repository.
+on: [push]
+
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Print Hello World
+      run: echo Hello World!
