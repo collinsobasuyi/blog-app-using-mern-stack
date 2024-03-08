@@ -1,0 +1,21 @@
+name: DevSecOps DAST Pipeline
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:  # Allows manual triggering of the workflow.
+
+jobs: 
+  zap_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: DAST (Dynamic Application Security Testing) - ZAP
+        uses: zaproxy/action-baseline@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker_name: 'owasp/zap2docker-stable'
+          target: 'https://ginandjuice.shop/vulnerabilities' 
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'

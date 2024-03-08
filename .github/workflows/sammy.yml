@@ -1,0 +1,54 @@
+name: DevSecOps Pipeline
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:  # Allows manual triggering of the workflow.
+
+jobs: 
+  gitleaks:
+    runs-on: ubuntu-latest
+    # Assuming sonar_cloud_unit_test_sast was meant to be this job's prerequisite,
+    # but given it's not defined, gitleaks will run without a dependency for now.
+    name: Gitleaks Secret Scan
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run git leaks to check for secrets
+        uses: zricethezav/gitleaks-action@v1 # Updated to use a tagged version instead of master for stability
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sonarcloud:
+    runs-on: ubuntu-latest
+    needs: gitleaks
+    name: SAST (Static Application Security Testing) - SonarCloud 
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14' # Updated to a valid node version and action
+      - run: npm install
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=noev-dev
+            -Dsonar.projectKey=noev-dev-project
+
+  snyk:
+    runs-on: ubuntu-latest
+    needs: sonarcloud
+    steps:
+      - uses: actions/checkout@v2
+      - name: SCA (Software Composition Analysis) - Snyk
+        uses: snyk/actions/node@master # Consider using a specific version for stability
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}    
+        with:
+          command: monitor
+
